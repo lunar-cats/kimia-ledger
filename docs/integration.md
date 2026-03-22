@@ -8,9 +8,9 @@ client from it in your own repository.
 `kimia-ledger-contracts-<version>.zip` attached to the GitHub release, containing:
 
 ```
-proto/ledger/v1/*.proto          # the API (source of truth)
-proto/google/api/annotations.proto, http.proto   # transcoding annotations the protos import
-openapi/ledger.v1.openapi.yaml   # generated from the protos
+proto/ledger/v1/*.proto                       # the API (source of truth)
+proto/google/api/{annotations,http,field_behavior}.proto   # googleapis files the protos import
+openapi/openapi.yaml                           # OpenAPI 3.0 generated from the protos
 CHECKSUMS.sha256
 ```
 
@@ -63,8 +63,12 @@ Use the generated request types; set `IdempotencyKey = Guid.NewGuid().ToString()
 
 ## .NET (REST from OpenAPI)
 
-Use any OpenAPI generator (Kiota, NSwag, openapi-generator) against `openapi/ledger.v1.openapi.yaml`.
-The REST paths and JSON field names are derived from the proto (`google.api.http`), so they stay in lockstep with gRPC. JSON uses lowerCamelCase field names and `int64` values as strings.
+Use any OpenAPI generator (Kiota, NSwag, openapi-generator) against `openapi/openapi.yaml`.
+The REST paths and JSON field names are derived from the proto (`google.api.http`), so they stay in lockstep with gRPC. JSON uses lowerCamelCase field names, enums as strings, and `int64` values (such as `amountMinor`) as strings.
+
+Errors on REST use the `google.rpc.Status` JSON shape. The `details` array holds one object with
+`"@type": "type.googleapis.com/ledger.v1.ErrorInfo"` and the fields `code`, `message`, `correlationId`, `fieldViolations`.
+The OpenAPI document shows `details` as a generic `Any`; the exact `ErrorInfo` shape is in `proto/ledger/v1/error.proto`.
 
 ## Other languages
 
@@ -78,3 +82,9 @@ sha256sum -c CHECKSUMS.sha256
 ```
 
 Release artifacts are also signed with cosign; verification instructions ship with the first release.
+
+## Regenerating locally
+
+```
+cd contracts && buf dep update && buf lint && buf generate   # writes openapi/openapi.yaml
+```

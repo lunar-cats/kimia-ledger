@@ -49,7 +49,8 @@ Dependency direction is inward only and is enforced by ArchUnit tests in `ledger
 ./gradlew spotlessApply         # format
 ./gradlew spotlessCheck         # format check (pre-commit runs this)
 ./gradlew :ledger-server:bootRun
-buf lint && buf breaking --against '.git#branch=main,subdir=contracts'   # run inside contracts/
+cd contracts && buf lint && buf format -d --exit-code && buf generate   # OpenAPI is committed; regenerate after any proto change
+cd contracts && buf breaking --against '../.git#branch=main,subdir=contracts'   # fails on any breaking change in ledger.v1
 gitleaks protect --staged       # secret scan (pre-commit runs this)
 git config core.hooksPath .githooks   # one-time, enables the pre-commit hook
 ```

@@ -42,8 +42,8 @@ Notation: `A` account, `E` entry, `P` posting, `cur(x)` currency of x, `amt(P) >
 - **I-20 No PII.** `external_ref` and `metadata` are opaque to the ledger, size-limited (255 chars / 4 KiB), and documented as must-not-contain personal data. Nothing else caller-supplied is stored.
 - **I-21 Request limits.** Request size, `external_ref` length, metadata size, postings per entry (I-2) and page size are bounded before any business logic runs. → `INVALID_ARGUMENT`
 
-## Proposed error code set (confirmed in Step 5)
+## Error codes
 
-`INVALID_ARGUMENT, INVALID_ENTRY, TOO_MANY_POSTINGS, INVALID_AMOUNT, UNBALANCED_ENTRY, CURRENCY_MISMATCH,
-ACCOUNT_NOT_FOUND, ACCOUNT_CLOSED, ACCOUNT_ALREADY_EXISTS, INSUFFICIENT_FUNDS, ENTRY_NOT_FOUND,
-ENTRY_ALREADY_REVERSED, DUPLICATE_IDEMPOTENCY_KEY_CONFLICT, PERMISSION_DENIED, UNAUTHENTICATED, RATE_LIMITED, INTERNAL`
+Defined once, in `contracts/proto/ledger/v1/error.proto` (`ledger.v1.ErrorCode`), with the gRPC and HTTP status
+each is delivered with. Values are only ever appended. `external_ref` is not unique, so there is no
+"account already exists" code; idempotency keys cover retries.

@@ -2,5 +2,5 @@ description = "gRPC inbound adapter"
 
 dependencies {
     implementation(project(":ledger-application"))
-    // grpc-stub / protobuf-java and the generated stubs arrive with the contracts (Step 5).
+    // grpc-stub / protobuf-java and stubs generated from contracts/proto arrive with the first adapter (Phase 2).
 }
