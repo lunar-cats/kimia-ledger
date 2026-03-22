@@ -1,0 +1,522 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Kimia Ledger API
+    description: |-
+        Kimia Ledger API, version 1. Served over gRPC and, via gRPC-JSON transcoding, over HTTPS/JSON on the
+         paths given by the google.api.http options (ADR 0004).
+
+         Cross-cutting rules:
+           - Authentication: OAuth2 client-credentials JWT in the `authorization` metadata / `Authorization: Bearer`
+             header, over mTLS. The tenant is a claim of that token. There is no tenant field anywhere in this API (I-19).
+           - Scopes: CreateAccount `accounts:write`; GetAccount `accounts:read`; PostEntry `entries:write`;
+             GetEntry `entries:read`; GetBalance `balances:read`; ListPostings `postings:read`.
+           - Idempotency: every write takes an `idempotency_key` (1-255 chars, caller-chosen, unique per tenant).
+             Retrying with the same key and payload returns the original result and sets `idempotent_replay` (I-15).
+           - Correlation: every request may carry a `correlation_id` (<= 128 chars); the server generates one if
+             absent and echoes it in every response and every ErrorInfo.
+           - Errors: gRPC status with a `ledger.v1.ErrorInfo` detail; REST returns the google.rpc.Status JSON
+             shape with the same ErrorInfo inside `details`. Branch on ErrorInfo.code.
+           - Limits: request body <= 256 KiB; postings per entry 2..100; page_size 1..1000 (default 100).
+    version: v1
+paths:
+    /v1/accounts:
+        post:
+            tags:
+                - LedgerService
+            description: Creates an account in the caller's tenant. Idempotent on idempotency_key.
+            operationId: LedgerService_CreateAccount
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateAccountRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CreateAccountResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/accounts/{accountId}:
+        get:
+            tags:
+                - LedgerService
+            description: Returns one account by id.
+            operationId: LedgerService_GetAccount
+            parameters:
+                - name: accountId
+                  in: path
+                  description: Account identifier.
+                  required: true
+                  schema:
+                    type: string
+                - name: correlationId
+                  in: query
+                  description: Optional caller correlation id.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetAccountResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/accounts/{accountId}/balance:
+        get:
+            tags:
+                - LedgerService
+            description: Returns the current presented balance of an account (I-9).
+            operationId: LedgerService_GetBalance
+            parameters:
+                - name: accountId
+                  in: path
+                  description: Account identifier.
+                  required: true
+                  schema:
+                    type: string
+                - name: correlationId
+                  in: query
+                  description: Optional caller correlation id.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetBalanceResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/accounts/{accountId}/postings:
+        get:
+            tags:
+                - LedgerService
+            description: Lists postings of an account in journal order (ascending sequence_no), paginated.
+            operationId: LedgerService_ListPostings
+            parameters:
+                - name: accountId
+                  in: path
+                  description: Account identifier.
+                  required: true
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  description: 1..1000; 0 means the server default (100). Larger values are clamped.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: Opaque token from a previous response. Empty for the first page.
+                  schema:
+                    type: string
+                - name: correlationId
+                  in: query
+                  description: Optional caller correlation id.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ListPostingsResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/entries:
+        post:
+            tags:
+                - LedgerService
+            description: Atomically posts a balanced journal entry (ADR 0008). Idempotent on idempotency_key.
+            operationId: LedgerService_PostEntry
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PostEntryRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PostEntryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+    /v1/entries/{entryId}:
+        get:
+            tags:
+                - LedgerService
+            description: Returns one entry with its postings.
+            operationId: LedgerService_GetEntry
+            parameters:
+                - name: entryId
+                  in: path
+                  description: Entry identifier.
+                  required: true
+                  schema:
+                    type: string
+                - name: correlationId
+                  in: query
+                  description: Optional caller correlation id.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetEntryResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
+components:
+    schemas:
+        Account:
+            required:
+                - externalRef
+                - type
+                - currencyCode
+            type: object
+            properties:
+                accountId:
+                    readOnly: true
+                    type: string
+                    description: Server-assigned identifier (UUID string). Stable forever.
+                externalRef:
+                    type: string
+                    description: |-
+                        Caller-chosen opaque reference, 1-255 characters. Must not contain personal data (ADR 0011).
+                         Not unique; the ledger never interprets it.
+                type:
+                    enum:
+                        - ACCOUNT_TYPE_UNSPECIFIED
+                        - ACCOUNT_TYPE_ASSET
+                        - ACCOUNT_TYPE_LIABILITY
+                        - ACCOUNT_TYPE_EQUITY
+                        - ACCOUNT_TYPE_INCOME
+                        - ACCOUNT_TYPE_EXPENSE
+                    type: string
+                    description: Accounting classification. Immutable after creation.
+                    format: enum
+                currencyCode:
+                    type: string
+                    description: ISO-4217 code of the only currency this account holds. Immutable after creation.
+                allowNegativeBalance:
+                    type: boolean
+                    description: Whether the presented balance may go below zero (I-11).
+                status:
+                    readOnly: true
+                    enum:
+                        - ACCOUNT_STATUS_UNSPECIFIED
+                        - ACCOUNT_STATUS_OPEN
+                        - ACCOUNT_STATUS_CLOSED
+                    type: string
+                    description: Current lifecycle state.
+                    format: enum
+                createdAt:
+                    readOnly: true
+                    type: string
+                    description: When the account was created.
+                    format: date-time
+            description: A ledger account within the caller's tenant. Holds exactly one currency for its whole life.
+        CreateAccountRequest:
+            required:
+                - idempotencyKey
+                - externalRef
+                - type
+                - currencyCode
+            type: object
+            properties:
+                idempotencyKey:
+                    type: string
+                    description: Caller-chosen key, 1-255 chars, unique per tenant (I-15).
+                correlationId:
+                    type: string
+                    description: Optional caller correlation id, <= 128 chars.
+                externalRef:
+                    type: string
+                    description: Opaque reference, 1-255 chars, no personal data.
+                type:
+                    enum:
+                        - ACCOUNT_TYPE_UNSPECIFIED
+                        - ACCOUNT_TYPE_ASSET
+                        - ACCOUNT_TYPE_LIABILITY
+                        - ACCOUNT_TYPE_EQUITY
+                        - ACCOUNT_TYPE_INCOME
+                        - ACCOUNT_TYPE_EXPENSE
+                    type: string
+                    description: Accounting classification.
+                    format: enum
+                currencyCode:
+                    type: string
+                    description: ISO-4217 code.
+                allowNegativeBalance:
+                    type: boolean
+                    description: Overrides the per-type default (false for ASSET and LIABILITY, true otherwise) when set.
+            description: Request for CreateAccount.
+        CreateAccountResponse:
+            type: object
+            properties:
+                account:
+                    allOf:
+                        - $ref: '#/components/schemas/Account'
+                    description: The created (or, on replay, the original) account.
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+                idempotentReplay:
+                    type: boolean
+                    description: True when this response was served from the idempotency record of an earlier identical request.
+            description: Response for CreateAccount.
+        Entry:
+            required:
+                - postings
+            type: object
+            properties:
+                entryId:
+                    readOnly: true
+                    type: string
+                    description: Server-assigned identifier (UUID string).
+                externalRef:
+                    type: string
+                    description: Caller-chosen opaque reference, 0-255 characters. Must not contain personal data (ADR 0011).
+                postings:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Posting'
+                    description: The legs. Order is preserved as submitted.
+                reversesEntryId:
+                    type: string
+                    description: Set when this entry reverses another one (I-14). Empty otherwise.
+                sequenceNo:
+                    readOnly: true
+                    type: string
+                    description: Tenant-wide journal position (I-18).
+                postedAt:
+                    readOnly: true
+                    type: string
+                    description: When the entry was committed.
+                    format: date-time
+                idempotencyKey:
+                    readOnly: true
+                    type: string
+                    description: The idempotency key the entry was created with, for audit correlation.
+            description: 'A committed journal entry: 2 to MAX_POSTINGS_PER_ENTRY postings, balanced per currency (I-1, I-2, I-4).'
+        GetAccountResponse:
+            type: object
+            properties:
+                account:
+                    allOf:
+                        - $ref: '#/components/schemas/Account'
+                    description: The account.
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+            description: Response for GetAccount.
+        GetBalanceResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                    description: The account.
+                balance:
+                    allOf:
+                        - $ref: '#/components/schemas/Money'
+                    description: 'Presented balance: positive on the account''s normal side (I-9). Negative only if allowed (I-11).'
+                asOfSequenceNo:
+                    type: string
+                    description: Journal position this balance reflects (I-18).
+                asOf:
+                    type: string
+                    description: Commit time of that journal position.
+                    format: date-time
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+            description: Response for GetBalance.
+        GetEntryResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/Entry'
+                    description: The entry with its postings.
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+            description: Response for GetEntry.
+        GoogleProtobufAny:
+            type: object
+            properties:
+                '@type':
+                    type: string
+                    description: The type of the serialized message.
+            additionalProperties: true
+            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        ListPostingsResponse:
+            type: object
+            properties:
+                postings:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Posting'
+                    description: Postings in ascending sequence_no.
+                nextPageToken:
+                    type: string
+                    description: Token for the next page; empty when there are no more results.
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+            description: Response for ListPostings.
+        Money:
+            type: object
+            properties:
+                currencyCode:
+                    type: string
+                    description: |-
+                        ISO-4217 alphabetic code, upper case (for example "EUR"). The minor-unit exponent comes from
+                         ISO-4217, never from the caller.
+                amountMinor:
+                    type: string
+                    description: |-
+                        Amount in minor units. On postings this is always >= 1; the side is carried by Direction.
+                         On balances it is signed and may be negative when the account allows it.
+            description: |-
+                Money is an exact amount in a currency's minor units (ADR 0006).
+                 Never floating point. 1050 with currency_code "EUR" means EUR 10.50; 1050 "JPY" means JPY 1050.
+        PostEntryRequest:
+            required:
+                - idempotencyKey
+                - postings
+            type: object
+            properties:
+                idempotencyKey:
+                    type: string
+                    description: Caller-chosen key, 1-255 chars, unique per tenant (I-15).
+                correlationId:
+                    type: string
+                    description: Optional caller correlation id, <= 128 chars.
+                externalRef:
+                    type: string
+                    description: Opaque reference, 0-255 chars, no personal data.
+                postings:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Posting'
+                    description: |-
+                        2..100 postings; debits must equal credits per currency (I-4). Only account_id, direction and
+                         money are read; output-only fields are ignored.
+                reversesEntryId:
+                    type: string
+                    description: When set, this entry reverses the referenced entry and must mirror it exactly (I-14).
+            description: Request for PostEntry.
+        PostEntryResponse:
+            type: object
+            properties:
+                entry:
+                    allOf:
+                        - $ref: '#/components/schemas/Entry'
+                    description: The committed entry, including server-assigned ids, sequence_no and posted_at.
+                correlationId:
+                    type: string
+                    description: Echoed or server-generated correlation id.
+                idempotentReplay:
+                    type: boolean
+                    description: True when served from the idempotency record of an earlier identical request.
+            description: Response for PostEntry.
+        Posting:
+            required:
+                - accountId
+                - direction
+                - money
+            type: object
+            properties:
+                postingId:
+                    readOnly: true
+                    type: string
+                    description: Server-assigned identifier (UUID string).
+                entryId:
+                    readOnly: true
+                    type: string
+                    description: The entry this posting belongs to.
+                accountId:
+                    type: string
+                    description: Account to post to. Must exist, be OPEN and belong to the caller's tenant (I-6, I-7).
+                direction:
+                    enum:
+                        - DIRECTION_UNSPECIFIED
+                        - DIRECTION_DEBIT
+                        - DIRECTION_CREDIT
+                    type: string
+                    description: Debit or credit.
+                    format: enum
+                money:
+                    allOf:
+                        - $ref: '#/components/schemas/Money'
+                    description: Amount (>= 1 minor unit) and currency. Currency must equal the account's currency (I-5).
+                sequenceNo:
+                    readOnly: true
+                    type: string
+                    description: Tenant-wide journal position of the owning entry (I-18). Strictly increasing per tenant.
+                postedAt:
+                    readOnly: true
+                    type: string
+                    description: When the owning entry was committed.
+                    format: date-time
+            description: One leg of a journal entry. Immutable once posted (ADR 0007).
+        Status:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+                    format: int32
+                message:
+                    type: string
+                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+                details:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/GoogleProtobufAny'
+                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
+            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
+tags:
+    - name: LedgerService
