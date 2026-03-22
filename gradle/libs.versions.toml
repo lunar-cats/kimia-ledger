@@ -1,0 +1,27 @@
+# Exact versions only. Verified against Maven Central on 2026-11-13.
+[versions]
+spring-boot = "4.1.2"
+junit = "6.0.3"
+assertj = "3.27.7"
+archunit = "1.5.1"
+spotless = "8.11.0"
+google-java-format = "2.0.0"
+
+[libraries]
+# BOMs
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+# Versions below come from the BOM they are used with.
+spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-jdbc = { module = "org.springframework:spring-jdbc" }
+spring-webmvc = { module = "org.springframework:spring-webmvc" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+archunit = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
