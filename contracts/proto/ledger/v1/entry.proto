@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package ledger.v1;
+
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+import "ledger/v1/money.proto";
+
+option csharp_namespace = "KimiaLedger.Contracts.V1";
+option go_package = "github.com/lunar-cats/kimia-ledger/contracts/gen/go/ledger/v1;ledgerv1";
+option java_multiple_files = true;
+option java_package = "com.kimialedger.contracts.ledger.v1";
+
+// Side of a posting. Amounts are always positive; the side is explicit (I-3).
+enum Direction {
+  // Not used.
+  DIRECTION_UNSPECIFIED = 0;
+  // Increases debit-normal accounts, decreases credit-normal ones.
+  DIRECTION_DEBIT = 1;
+  // Increases credit-normal accounts, decreases debit-normal ones.
+  DIRECTION_CREDIT = 2;
+}
+
+// One leg of a journal entry. Immutable once posted (ADR 0007).
+message Posting {
+  // Server-assigned identifier (UUID string).
+  string posting_id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // The entry this posting belongs to.
+  string entry_id = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // Account to post to. Must exist, be OPEN and belong to the caller's tenant (I-6, I-7).
+  string account_id = 3 [(google.api.field_behavior) = REQUIRED];
+  // Debit or credit.
+  Direction direction = 4 [(google.api.field_behavior) = REQUIRED];
+  // Amount (>= 1 minor unit) and currency. Currency must equal the account's currency (I-5).
+  Money money = 5 [(google.api.field_behavior) = REQUIRED];
+  // Tenant-wide journal position of the owning entry (I-18). Strictly increasing per tenant.
+  int64 sequence_no = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // When the owning entry was committed.
+  google.protobuf.Timestamp posted_at = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// A committed journal entry: 2 to MAX_POSTINGS_PER_ENTRY postings, balanced per currency (I-1, I-2, I-4).
+message Entry {
+  // Server-assigned identifier (UUID string).
+  string entry_id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // Caller-chosen opaque reference, 0-255 characters. Must not contain personal data (ADR 0011).
+  string external_ref = 2;
+  // The legs. Order is preserved as submitted.
+  repeated Posting postings = 3 [(google.api.field_behavior) = REQUIRED];
+  // Set when this entry reverses another one (I-14). Empty otherwise.
+  string reverses_entry_id = 4;
+  // Tenant-wide journal position (I-18).
+  int64 sequence_no = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // When the entry was committed.
+  google.protobuf.Timestamp posted_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // The idempotency key the entry was created with, for audit correlation.
+  string idempotency_key = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}

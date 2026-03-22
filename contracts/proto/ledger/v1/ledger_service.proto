@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+package ledger.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+import "ledger/v1/account.proto";
+import "ledger/v1/entry.proto";
+import "ledger/v1/money.proto";
+
+option csharp_namespace = "KimiaLedger.Contracts.V1";
+option go_package = "github.com/lunar-cats/kimia-ledger/contracts/gen/go/ledger/v1;ledgerv1";
+option java_multiple_files = true;
+option java_package = "com.kimialedger.contracts.ledger.v1";
+
+// Kimia Ledger API, version 1. Served over gRPC and, via gRPC-JSON transcoding, over HTTPS/JSON on the
+// paths given by the google.api.http options (ADR 0004).
+//
+// Cross-cutting rules:
+//   - Authentication: OAuth2 client-credentials JWT in the `authorization` metadata / `Authorization: Bearer`
+//     header, over mTLS. The tenant is a claim of that token. There is no tenant field anywhere in this API (I-19).
+//   - Scopes: CreateAccount `accounts:write`; GetAccount `accounts:read`; PostEntry `entries:write`;
+//     GetEntry `entries:read`; GetBalance `balances:read`; ListPostings `postings:read`.
+//   - Idempotency: every write takes an `idempotency_key` (1-255 chars, caller-chosen, unique per tenant).
+//     Retrying with the same key and payload returns the original result and sets `idempotent_replay` (I-15).
+//   - Correlation: every request may carry a `correlation_id` (<= 128 chars); the server generates one if
+//     absent and echoes it in every response and every ErrorInfo.
+//   - Errors: gRPC status with a `ledger.v1.ErrorInfo` detail; REST returns the google.rpc.Status JSON
+//     shape with the same ErrorInfo inside `details`. Branch on ErrorInfo.code.
+//   - Limits: request body <= 256 KiB; postings per entry 2..100; page_size 1..1000 (default 100).
+service LedgerService {
+  // Creates an account in the caller's tenant. Idempotent on idempotency_key.
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse) {
+    option (google.api.http) = {
+      post: "/v1/accounts"
+      body: "*"
+    };
+  }
+
+  // Returns one account by id.
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {
+    option (google.api.http) = {get: "/v1/accounts/{account_id}"};
+  }
+
+  // Atomically posts a balanced journal entry (ADR 0008). Idempotent on idempotency_key.
+  rpc PostEntry(PostEntryRequest) returns (PostEntryResponse) {
+    option (google.api.http) = {
+      post: "/v1/entries"
+      body: "*"
+    };
+  }
+
+  // Returns one entry with its postings.
+  rpc GetEntry(GetEntryRequest) returns (GetEntryResponse) {
+    option (google.api.http) = {get: "/v1/entries/{entry_id}"};
+  }
+
+  // Returns the current presented balance of an account (I-9).
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {
+    option (google.api.http) = {get: "/v1/accounts/{account_id}/balance"};
+  }
+
+  // Lists postings of an account in journal order (ascending sequence_no), paginated.
+  rpc ListPostings(ListPostingsRequest) returns (ListPostingsResponse) {
+    option (google.api.http) = {get: "/v1/accounts/{account_id}/postings"};
+  }
+}
+
+// Request for CreateAccount.
+message CreateAccountRequest {
+  // Caller-chosen key, 1-255 chars, unique per tenant (I-15).
+  string idempotency_key = 1 [(google.api.field_behavior) = REQUIRED];
+  // Optional caller correlation id, <= 128 chars.
+  string correlation_id = 2;
+  // Opaque reference, 1-255 chars, no personal data.
+  string external_ref = 3 [(google.api.field_behavior) = REQUIRED];
+  // Accounting classification.
+  AccountType type = 4 [(google.api.field_behavior) = REQUIRED];
+  // ISO-4217 code.
+  string currency_code = 5 [(google.api.field_behavior) = REQUIRED];
+  // Overrides the per-type default (false for ASSET and LIABILITY, true otherwise) when set.
+  optional bool allow_negative_balance = 6;
+}
+
+// Response for CreateAccount.
+message CreateAccountResponse {
+  // The created (or, on replay, the original) account.
+  Account account = 1;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 2;
+  // True when this response was served from the idempotency record of an earlier identical request.
+  bool idempotent_replay = 3;
+}
+
+// Request for GetAccount.
+message GetAccountRequest {
+  // Account identifier.
+  string account_id = 1 [(google.api.field_behavior) = REQUIRED];
+  // Optional caller correlation id.
+  string correlation_id = 2;
+}
+
+// Response for GetAccount.
+message GetAccountResponse {
+  // The account.
+  Account account = 1;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 2;
+}
+
+// Request for PostEntry.
+message PostEntryRequest {
+  // Caller-chosen key, 1-255 chars, unique per tenant (I-15).
+  string idempotency_key = 1 [(google.api.field_behavior) = REQUIRED];
+  // Optional caller correlation id, <= 128 chars.
+  string correlation_id = 2;
+  // Opaque reference, 0-255 chars, no personal data.
+  string external_ref = 3;
+  // 2..100 postings; debits must equal credits per currency (I-4). Only account_id, direction and
+  // money are read; output-only fields are ignored.
+  repeated Posting postings = 4 [(google.api.field_behavior) = REQUIRED];
+  // When set, this entry reverses the referenced entry and must mirror it exactly (I-14).
+  string reverses_entry_id = 5;
+}
+
+// Response for PostEntry.
+message PostEntryResponse {
+  // The committed entry, including server-assigned ids, sequence_no and posted_at.
+  Entry entry = 1;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 2;
+  // True when served from the idempotency record of an earlier identical request.
+  bool idempotent_replay = 3;
+}
+
+// Request for GetEntry.
+message GetEntryRequest {
+  // Entry identifier.
+  string entry_id = 1 [(google.api.field_behavior) = REQUIRED];
+  // Optional caller correlation id.
+  string correlation_id = 2;
+}
+
+// Response for GetEntry.
+message GetEntryResponse {
+  // The entry with its postings.
+  Entry entry = 1;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 2;
+}
+
+// Request for GetBalance.
+message GetBalanceRequest {
+  // Account identifier.
+  string account_id = 1 [(google.api.field_behavior) = REQUIRED];
+  // Optional caller correlation id.
+  string correlation_id = 2;
+}
+
+// Response for GetBalance.
+message GetBalanceResponse {
+  // The account.
+  string account_id = 1;
+  // Presented balance: positive on the account's normal side (I-9). Negative only if allowed (I-11).
+  Money balance = 2;
+  // Journal position this balance reflects (I-18).
+  int64 as_of_sequence_no = 3;
+  // Commit time of that journal position.
+  google.protobuf.Timestamp as_of = 4;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 5;
+}
+
+// Request for ListPostings.
+message ListPostingsRequest {
+  // Account identifier.
+  string account_id = 1 [(google.api.field_behavior) = REQUIRED];
+  // 1..1000; 0 means the server default (100). Larger values are clamped.
+  int32 page_size = 2;
+  // Opaque token from a previous response. Empty for the first page.
+  string page_token = 3;
+  // Optional caller correlation id.
+  string correlation_id = 4;
+}
+
+// Response for ListPostings.
+message ListPostingsResponse {
+  // Postings in ascending sequence_no.
+  repeated Posting postings = 1;
+  // Token for the next page; empty when there are no more results.
+  string next_page_token = 2;
+  // Echoed or server-generated correlation id.
+  string correlation_id = 3;
+}

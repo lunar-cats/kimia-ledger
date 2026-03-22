@@ -1,0 +1,9 @@
+version: v2
+plugins:
+  - remote: buf.build/community/google-gnostic-openapi:v0.7.1
+    out: openapi
+    opt:
+      - title=Kimia Ledger API
+      - version=v1
+      - enum_type=string
+      - default_response=true

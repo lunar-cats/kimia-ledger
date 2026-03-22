@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package ledger.v1;
+
+option csharp_namespace = "KimiaLedger.Contracts.V1";
+option go_package = "github.com/lunar-cats/kimia-ledger/contracts/gen/go/ledger/v1;ledgerv1";
+option java_multiple_files = true;
+option java_package = "com.kimialedger.contracts.ledger.v1";
+
+// Stable, machine-readable failure reasons. Consumers branch on this enum, never on the message text.
+// Values are only ever added, never renumbered or removed.
+// Each value lists the gRPC status and HTTP status it is delivered with.
+enum ErrorCode {
+  // Not used. Its presence on the wire is a server bug.
+  ERROR_CODE_UNSPECIFIED = 0;
+  // A field failed shape or limit validation (length, range, format). INVALID_ARGUMENT / 400.
+  ERROR_CODE_INVALID_ARGUMENT = 1;
+  // Entry has fewer than 2 postings or is otherwise structurally invalid (I-1). INVALID_ARGUMENT / 400.
+  ERROR_CODE_INVALID_ENTRY = 2;
+  // Entry exceeds the maximum number of postings (I-2). INVALID_ARGUMENT / 400.
+  ERROR_CODE_TOO_MANY_POSTINGS = 3;
+  // A posting amount is < 1, or arithmetic would overflow (I-3, I-8). INVALID_ARGUMENT / 400.
+  ERROR_CODE_INVALID_AMOUNT = 4;
+  // Debits do not equal credits for some currency in the entry (I-4). FAILED_PRECONDITION / 422.
+  ERROR_CODE_UNBALANCED_ENTRY = 5;
+  // A posting's currency differs from its account's currency (I-5). FAILED_PRECONDITION / 422.
+  ERROR_CODE_CURRENCY_MISMATCH = 6;
+  // The account does not exist in the caller's tenant (I-6). NOT_FOUND / 404.
+  ERROR_CODE_ACCOUNT_NOT_FOUND = 7;
+  // The account is closed and cannot take postings (I-7). FAILED_PRECONDITION / 422.
+  ERROR_CODE_ACCOUNT_CLOSED = 8;
+  // The entry would take an account below zero that does not allow it (I-11). FAILED_PRECONDITION / 422.
+  ERROR_CODE_INSUFFICIENT_FUNDS = 9;
+  // The entry does not exist in the caller's tenant. NOT_FOUND / 404.
+  ERROR_CODE_ENTRY_NOT_FOUND = 10;
+  // The referenced entry has already been reversed (I-14). FAILED_PRECONDITION / 422.
+  ERROR_CODE_ENTRY_ALREADY_REVERSED = 11;
+  // The idempotency key was already used with a different request payload (I-15). ABORTED / 409.
+  ERROR_CODE_DUPLICATE_IDEMPOTENCY_KEY_CONFLICT = 12;
+  // The credential lacks the scope for this operation. PERMISSION_DENIED / 403.
+  ERROR_CODE_PERMISSION_DENIED = 13;
+  // Missing or invalid credential. UNAUTHENTICATED / 401.
+  ERROR_CODE_UNAUTHENTICATED = 14;
+  // The client exceeded its rate limit. RESOURCE_EXHAUSTED / 429.
+  ERROR_CODE_RATE_LIMITED = 15;
+  // Unexpected server failure. Safe to retry with the same idempotency key. INTERNAL / 500.
+  ERROR_CODE_INTERNAL = 16;
+}
+
+// ErrorInfo is attached to every failed response: as a google.rpc.Status detail on gRPC, and inside the
+// `details` array of the JSON error body on REST. It never contains stack traces, SQL or internal ids.
+message ErrorInfo {
+  // The stable reason.
+  ErrorCode code = 1;
+  // Human-readable explanation for operators. Not stable; do not parse.
+  string message = 2;
+  // The correlation id of the failed request, for log lookup.
+  string correlation_id = 3;
+  // Per-field problems, present for INVALID_ARGUMENT-class codes.
+  repeated FieldViolation field_violations = 4;
+}
+
+// A single invalid request field.
+message FieldViolation {
+  // Path of the field in the request, for example "postings[2].money.currency_code".
+  string field = 1;
+  // What is wrong with it.
+  string description = 2;
+}

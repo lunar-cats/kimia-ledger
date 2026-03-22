@@ -1,0 +1,13 @@
+version: v2
+modules:
+  - path: proto
+deps:
+  # google.api.http / field_behavior annotations. Pinned to a commit; bump via `buf dep update` in a reviewed PR.
+  - buf.build/googleapis/googleapis:8ac61b9e502343289c8c42b17aa5b245
+lint:
+  use:
+    - STANDARD
+    - COMMENTS
+breaking:
+  use:
+    - FILE

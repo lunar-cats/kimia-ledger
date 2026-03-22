@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package ledger.v1;
+
+option csharp_namespace = "KimiaLedger.Contracts.V1";
+option go_package = "github.com/lunar-cats/kimia-ledger/contracts/gen/go/ledger/v1;ledgerv1";
+option java_multiple_files = true;
+option java_package = "com.kimialedger.contracts.ledger.v1";
+
+// Money is an exact amount in a currency's minor units (ADR 0006).
+// Never floating point. 1050 with currency_code "EUR" means EUR 10.50; 1050 "JPY" means JPY 1050.
+message Money {
+  // ISO-4217 alphabetic code, upper case (for example "EUR"). The minor-unit exponent comes from
+  // ISO-4217, never from the caller.
+  string currency_code = 1;
+  // Amount in minor units. On postings this is always >= 1; the side is carried by Direction.
+  // On balances it is signed and may be negative when the account allows it.
+  int64 amount_minor = 2;
+}

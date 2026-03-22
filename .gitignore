@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+# OS
+.DS_Store
+# Local secrets / env (never commit)
+.env
+.env.*
+*.pem
+*.p12
+*.jks
+# Claude Code local overrides
+.claude/settings.local.json

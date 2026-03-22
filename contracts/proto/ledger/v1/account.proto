@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package ledger.v1;
+
+import "google/api/field_behavior.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "KimiaLedger.Contracts.V1";
+option go_package = "github.com/lunar-cats/kimia-ledger/contracts/gen/go/ledger/v1;ledgerv1";
+option java_multiple_files = true;
+option java_package = "com.kimialedger.contracts.ledger.v1";
+
+// Accounting classification. Determines the normal balance side (ADR 0005).
+enum AccountType {
+  // Not used.
+  ACCOUNT_TYPE_UNSPECIFIED = 0;
+  // Debit-normal.
+  ACCOUNT_TYPE_ASSET = 1;
+  // Credit-normal.
+  ACCOUNT_TYPE_LIABILITY = 2;
+  // Credit-normal.
+  ACCOUNT_TYPE_EQUITY = 3;
+  // Credit-normal.
+  ACCOUNT_TYPE_INCOME = 4;
+  // Debit-normal.
+  ACCOUNT_TYPE_EXPENSE = 5;
+}
+
+// Lifecycle state of an account.
+enum AccountStatus {
+  // Not used.
+  ACCOUNT_STATUS_UNSPECIFIED = 0;
+  // Accepts postings.
+  ACCOUNT_STATUS_OPEN = 1;
+  // Rejects postings (ERROR_CODE_ACCOUNT_CLOSED). History stays readable.
+  ACCOUNT_STATUS_CLOSED = 2;
+}
+
+// A ledger account within the caller's tenant. Holds exactly one currency for its whole life.
+message Account {
+  // Server-assigned identifier (UUID string). Stable forever.
+  string account_id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // Caller-chosen opaque reference, 1-255 characters. Must not contain personal data (ADR 0011).
+  // Not unique; the ledger never interprets it.
+  string external_ref = 2 [(google.api.field_behavior) = REQUIRED];
+  // Accounting classification. Immutable after creation.
+  AccountType type = 3 [(google.api.field_behavior) = REQUIRED];
+  // ISO-4217 code of the only currency this account holds. Immutable after creation.
+  string currency_code = 4 [(google.api.field_behavior) = REQUIRED];
+  // Whether the presented balance may go below zero (I-11).
+  bool allow_negative_balance = 5;
+  // Current lifecycle state.
+  AccountStatus status = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+  // When the account was created.
+  google.protobuf.Timestamp created_at = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
