@@ -14,3 +14,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - Agent team setup, permission deny list, pre-commit hook (gitleaks, format, fast tests).
 - ADRs 0001–0013, ledger invariants, STRIDE threat model, security checklist, integration guide.
 - SECURITY.md, CONTRIBUTING.md, README.md, NOTICE.
+- ADRs 0014–0032 (Proposed) from the 2026-11-14 architecture review and an independent audit; invariants, threat model and security checklist aligned with them.
