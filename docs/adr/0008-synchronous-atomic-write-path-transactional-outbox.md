@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0020, ADR 0021, ADR 0026 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 Callers need an immediate, authoritative answer (posted or rejected). Downstream systems need events, but
 publishing to a broker inside a DB transaction is not atomic.

@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0025 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 The journal is immutable and long-lived. Personal data inside it could never be erased, which conflicts with
 privacy law and with the append-only decision.

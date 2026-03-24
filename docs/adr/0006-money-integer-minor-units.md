@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0019 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 Binary floating point cannot represent decimal money exactly. Rounding differences in a ledger are money
 created or destroyed.

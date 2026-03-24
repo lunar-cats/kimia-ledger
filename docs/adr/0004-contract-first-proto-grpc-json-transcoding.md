@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0015, ADR 0018, ADR 0032 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 Consumers (first: a .NET service in another repository) need stable, versioned contracts and generate their
 own clients. REST and gRPC must both be first-class and must never drift apart.

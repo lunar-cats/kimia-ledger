@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0019, ADR 0028 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 The first production deployment runs on Oracle. We want the option of Oracle Immutable/Blockchain tables for
 the journal. jOOQ requires a commercial licence for Oracle editions, which conflicts with an Apache-2.0 project.

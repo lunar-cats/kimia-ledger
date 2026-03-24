@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0023, ADR 0027 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 One deployment serves several isolated tenants. Retrofitting tenancy into a ledger is high risk.
 

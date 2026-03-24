@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0016, ADR 0020 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 Real transactions touch more than two accounts (fees, taxes, splits). Two-leg "transfer" models force callers
 to decompose and lose atomicity.

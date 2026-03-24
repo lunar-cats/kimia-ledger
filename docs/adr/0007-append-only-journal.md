@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0016, ADR 0020, ADR 0029 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 A ledger is evidence. Any ability to edit or delete a posting destroys auditability and enables fraud.
 
