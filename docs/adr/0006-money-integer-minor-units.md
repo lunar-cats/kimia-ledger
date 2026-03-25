@@ -2,7 +2,7 @@
 
 Status: Accepted · Date: 2026-11-13
 
-Amended by ADR 0019 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+Amended by ADR 0015 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins. Oracle-specific statements are historical (ADR 0014). int64 / ISO-4217 money statements are historical (ADR 0015).
 
 ## Context
 Binary floating point cannot represent decimal money exactly. Rounding differences in a ledger are money

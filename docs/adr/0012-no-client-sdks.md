@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0019 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+
 ## Context
 Shipping SDKs for every consumer language multiplies release work and couples consumers to this repository's
 release cycle. The first consumer is .NET.

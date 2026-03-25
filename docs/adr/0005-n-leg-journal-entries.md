@@ -2,7 +2,7 @@
 
 Status: Accepted · Date: 2026-11-13
 
-Amended by ADR 0016, ADR 0020 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+Amended by ADR 0016, ADR 0017, ADR 0021 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins. Ledger-owned account lifecycle statements are historical (ADR 0021).
 
 ## Context
 Real transactions touch more than two accounts (fees, taxes, splits). Two-leg "transfer" models force callers

@@ -2,7 +2,7 @@
 
 Status: Accepted · Date: 2026-11-13
 
-Amended by ADR 0017 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+Amended by ADR 0018 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
 
 ## Context
 Network retries must never create a second entry. Callers cannot know whether a timed-out request committed.

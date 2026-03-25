@@ -2,7 +2,7 @@
 
 Status: Accepted · Date: 2026-11-13
 
-Amended by ADR 0016, ADR 0020, ADR 0029 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+Amended by ADR 0014, ADR 0016, ADR 0017, ADR 0025 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins. Oracle-specific statements are historical (ADR 0014).
 
 ## Context
 A ledger is evidence. Any ability to edit or delete a posting destroys auditability and enables fraud.

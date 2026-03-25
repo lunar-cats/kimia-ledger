@@ -2,7 +2,7 @@
 
 Status: Accepted · Date: 2026-11-13
 
-Amended by ADR 0020, ADR 0021, ADR 0023, ADR 0024 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins.
+Amended by ADR 0014, ADR 0017, ADR 0020, ADR 0021, ADR 0024 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins. Ledger-owned account lifecycle statements are historical (ADR 0021).
 
 ## Context
 A ledger is a high-value target. These controls are decided up front so later work cannot trade them away.

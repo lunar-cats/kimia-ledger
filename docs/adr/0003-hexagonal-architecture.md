@@ -2,6 +2,8 @@
 
 Status: Accepted · Date: 2026-11-13
 
+Amended by ADR 0014, ADR 0024 (Proposed). The text below is unchanged; where it conflicts with an accepted amendment, the amendment wins. Oracle-specific statements are historical (ADR 0014).
+
 ## Context
 The ledger must be reachable over REST and gRPC today and over a message broker later, without duplicating
 business rules or coupling the domain to any transport or database.
