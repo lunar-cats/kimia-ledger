@@ -14,8 +14,9 @@ Thank you. This is a ledger: correctness and security beat speed. Small, reviewe
 
 ## Rules of the road
 - Module boundaries are enforced by ArchUnit; never loosen a rule to make a build pass.
-- All SQL in `ledger-persistence-oracle`; no framework types in `ledger-core`/`ledger-application`.
-- Money is integer minor units. No floats. Postings are append-only.
+- All SQL and jOOQ in the PostgreSQL persistence module (`ledger-persistence-postgres`; the build still calls it
+  `ledger-persistence-oracle`, pending rename (ADR 0014)); no framework types in `ledger-core`/`ledger-application`.
+- Money is integer minor units (`NUMERIC(38,0)` / `BigInteger`). No floats. Postings are append-only.
 - Every invariant change updates `docs/domain/invariants.md` and gets a property-based test.
 - API changes go through `contracts/` first; `buf lint` and `buf breaking` must pass.
 - New dependency: Apache-2.0/MIT/BSD/EPL licence only, exact version, justified in the PR.

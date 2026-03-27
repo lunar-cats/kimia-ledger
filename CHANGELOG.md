@@ -14,4 +14,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - Agent team setup, permission deny list, pre-commit hook (gitleaks, format, fast tests).
 - ADRs 0001–0013, ledger invariants, STRIDE threat model, security checklist, integration guide.
 - SECURITY.md, CONTRIBUTING.md, README.md, NOTICE.
-- ADRs 0014–0032 (Proposed) from the 2026-11-14 architecture review and an independent audit; invariants, threat model and security checklist aligned with them.
+- ADRs 0014–0026 (Proposed), from the 2026-11-14 architecture review, an independent audit and the owner's final decisions of 2026-11-15, consolidated from 30 drafts into 13 (PostgreSQL 18 with jOOQ, `NUMERIC(38,0)` money, Ledger-owned wallets with an external Account Service, wallet states, provisioning saga, fence and seal, native holds, Kafka outbox/inbox, FX valuation, independent Java service); invariants, security docs, architecture review with a re-run DDL, `CLAUDE.md`, `README.md` and `CONTRIBUTING.md` aligned with them.
